@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <body>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <p>
+            {{ form.videofile }}
+            </p>
+            <p>
+                <input type="submit" value="Upload video">
+            </p>
+        </form>
+
+        <h3>{{ uploaded }}</h3>
+
+        <div class="progress">
+          <div class="bar"></div >
+          <div class="percent">0%</div >
+        </div>
+        <div id="status"></div>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
+        <script src="http://malsup.github.com/jquery.form.js"></script>
+        <script src="{{ url_for('static', filename = 'upload_bar.js') }}"></script>
+    </body>
+</html>
