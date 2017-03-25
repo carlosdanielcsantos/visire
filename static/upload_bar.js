@@ -21,3 +21,6 @@ $(function() {
         }
     });
 });
+
+var t = setInterval(function() {
+    document.getElementById("state").innerHTML = state;}, 500);

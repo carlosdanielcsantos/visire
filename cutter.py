@@ -9,7 +9,7 @@ Created on Mon Mar 20 21:34:07 2017
 from moviepy.editor import *
 import numpy as np
 
-def video_cutter(filename):
+def video_cutter(filename, magnitude, period):
 
     clip = VideoFileClip(filename)
     
@@ -20,8 +20,12 @@ def video_cutter(filename):
     join_audio = abs(audio).sum(axis=1)/clip.audio.nchannels
     max_vol = join_audio.max()
     
-    minTime = 3.0
-    volThreshold = 0.2
+    periodThresholds = [2, 5, 10]
+    magnitudeThresholds = [0.1, 0.2, 0.3]
+    
+    minTime = periodThresholds[period]
+    volThreshold = magnitudeThresholds[magnitude]
+    
     cuts = list()
     growing = False
     
@@ -48,7 +52,6 @@ def video_cutter(filename):
     for i in range(activeTimes.shape[0]):
         listOfClips.append(clip.subclip(activeTimes[i,0], activeTimes[i,1]))
         
-        
     final_clip = concatenate_videoclips(listOfClips)
     
     #filename.rpartition('/')[-1] = 
@@ -57,4 +60,3 @@ def video_cutter(filename):
     final_clip.write_videofile(cut_filename)
     
     return cut_filename
-

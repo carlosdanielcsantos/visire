@@ -1,8 +1,6 @@
 <!DOCTYPE html>
-<html>
-    <body>
         <h3>{{ uploaded }}</h3>
-        <form method="POST" action="/">
+        <form method="POST">
           {{ form.hidden_tag() }}
           {{ form.magnitude.label }}
           <p>
@@ -25,11 +23,7 @@
           </p>
         </form>
 
-        <div class="progress">
-          <div class="bar"></div >
-          <div class="percent">0%</div >
+        <div class="cut_progress">
+          <div class="cut_bar"></div >
+          <div class="cut_percent">0%</div >
         </div>
-        <div id="status"></div>
-
-    </body>
-</html>
