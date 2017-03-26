@@ -19,10 +19,10 @@ class UploadForm(Form):
                                                    'flv'], 'Videos only!')])
 
 class SettingsForm(Form):
-    magnitude = RadioField('Intensity',
-                           choices=[('0','Low'), ('1','Medium'), ('2','High')],
+    magnitude = RadioField('Noise',
+                           choices=[('0','Background'), ('1','Low'), ('2','Medium')],
                            default='0')
-    period = RadioField('Period',
+    period = RadioField('Duration',
                         choices=[('0','Short'), ('1','Medium'), ('2','Long')],
                         default='0')
 
