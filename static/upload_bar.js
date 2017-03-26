@@ -1,6 +1,6 @@
 $(function() {
 
-    var bar = $('.bar');
+    var bar = $('.progress-bar');
     var percent = $('.percent');
     var status = $('#status');
 
@@ -8,13 +8,11 @@ $(function() {
         beforeSend: function() {
             status.empty();
             var percentVal = '0%';
-            bar.width(percentVal);
-            percent.html(percentVal);
+            bar.attr('aria-valuenow', percentVal).css('width', percentVal);
         },
         uploadProgress: function(event, position, total, percentComplete) {
             var percentVal = percentComplete + '%';
-            bar.width(percentVal);
-            percent.html(percentVal);
+            bar.attr('aria-valuenow', percentVal).css('width', percentVal);
         },
         complete: function(xhr) {
             status.html(xhr.responseText);
@@ -22,5 +20,16 @@ $(function() {
     });
 });
 
-var t = setInterval(function() {
-    document.getElementById("state").innerHTML = state;}, 500);
+$(document).ready(
+    function(){
+        $('input:file').change(
+            function(){
+                if ($(this).val()) {
+                    $('#uploadButon').removeClass('disabled');
+                    $('input:submit').attr('disabled',false);
+                    // or, as has been pointed out elsewhere:
+                    // $('input:submit').removeAttr('disabled');
+                }
+            }
+            );
+});

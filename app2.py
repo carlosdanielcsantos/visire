@@ -1,17 +1,22 @@
-from flask import Flask, session
+from flask import Flask, session, jsonify, url_for
 from flask import render_template, redirect, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from cutter import video_cutter
 from flask_wtf import Form
-from flask_wtf.file import FileField, FileRequired
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import RadioField
 from wtforms.validators import DataRequired
-import os
+from flask_bootstrap import Bootstrap
+import os, time
 
 SECRET_KEY = 'unv93qr32rfvby'
 
 class UploadForm(Form):
-    videofile = FileField(validators=[FileRequired()])
+    videofile = FileField(validators=[FileRequired(),
+                                      FileAllowed(['mp4',
+                                                   'avi',
+                                                   'mkv',
+                                                   'flv'], 'Videos only!')])
 
 class SettingsForm(Form):
     magnitude = RadioField('Intensity',
@@ -22,19 +27,22 @@ class SettingsForm(Form):
                         default='0')
 
 app = Flask('cutter')
+Bootstrap(app)
 
 app.config["UPLOAD_FOLDER"] = "uploads"
 app.config.from_object(__name__)
 
-filename = ''; filepath = ''
+filename = ''
+filepath = ''
+cutter = None
+state = 'Waiting'
 
 @app.route("/", methods=("GET", "POST",))
 def index():
-    global filepath, filename
-    state = 'Waiting'
-    
     uploadForm = UploadForm()
     settingsForm = SettingsForm()
+
+    global filename, filepath, state, cutter
 
     if uploadForm.validate_on_submit():
         # get form data
@@ -49,46 +57,49 @@ def index():
 
         # render settings
         return render_template('cut.html', form=settingsForm,
-                               uploaded=filename, state=state)
-
+                               uploaded=filename)
 
     if settingsForm.validate_on_submit():
         magnitude = int(settingsForm.magnitude.data)
         period = int(settingsForm.period.data)
 
         state = 'Starting...'
-        result = video_cutter(filepath, magnitude, period)
-        state = 'Finished!'
-        print os.path.split(result)[1]
+        cutter = video_cutter(filepath, magnitude, period)
 
-        return send_file(result,
-                     #mimetype='text/csv',
-                     attachment_filename='result.mp4',
-                     as_attachment=True)
-        #return redirect('')
-        #return send_from_directory('/uploads', os.path.split(result)[1],
-        #                               as_attachment=True)
+        cutter.start()
 
-    return render_template('index2.html', form=uploadForm, uploaded=filename,
-                           state=state)
+        # return empty
+        return ('', 204)
+
+    return render_template('index2.html', form=uploadForm,
+                           uploaded=filename)
+
+@app.route('/_state', methods= ['GET'])
+def _state():
+    global cutter
+    if cutter is not None:
+        #if cutter.finished and not cutter.sent:
+        #    return redirect(url_for('send_result'))
+        return jsonify(state=cutter.state)
+    else:
+        return jsonify(state="Waiting")
+
+@app.route('/send_result', methods=("GET", "POST",))
+def send_result():
+    global cutter, state
+    result = cutter.cut_filename
+
+    print "Sending result..."
+    state = 'Finished!'
+    print os.path.split(result)[1]
+    cutter.sent = True
+
+    return send_file(result,
+                 #mimetype='text/csv',
+                 attachment_filename='result.mp4',
+                 as_attachment=True)
 
 
-@app.route("/cut", methods=["POST"])
-def cut():
-    print settings.magnitude.data
-    print settings.period.data
-
-    cut_file = video_cutter(filepath)
-
-    return send_file(cut_file,
-                     #mimetype='text/csv',
-                     attachment_filename='result.mp4',
-                     as_attachment=True)
 
 
-@app.route('/uploads/<filename>')
-def serve_file(filename):
-    root_dir = os.path.dirname(os.getcwd())
-    return send_from_directory(os.path.join(root_dir, 'uploads'), filename)
-
-app.run(debug=False)
+app.run(debug=True)

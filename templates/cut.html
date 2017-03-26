@@ -1,29 +1,56 @@
 <!DOCTYPE html>
-        <h3>{{ uploaded }}</h3>
-        <form method="POST">
-          {{ form.hidden_tag() }}
-          {{ form.magnitude.label }}
-          <p>
-          {% for subfield in form.magnitude %}
-          <tr>
-            <td>{{ subfield }}</td>
-            <td>{{ subfield.label }}</td>
-          </tr>
-          {% endfor %}
-          </p>
-          {{ form.period.label }}
-          <p>
-          {% for subfield in form.period %}
-          <tr>
-            <td>{{ subfield }}</td>
-            <td>{{ subfield.label }}</td>
-          </tr>
-          {% endfor %}
-          <input type="submit" value="Go">
-          </p>
-        </form>
+<h3>{{ uploaded }}</h3>
+<form method="POST">
+  {{ form.hidden_tag() }}
+  <p>
+    {{ form.magnitude.label }}
+    <span class="btn-group colors" data-toggle="buttons">
+      {% for subfield in form.magnitude %}
+      {% if loop.index <= 1 %}
+      <label class="btn btn-default active">
+        {% else %}
+        <label class="btn btn-default">
+          {% endif %}
+          <td>{{ subfield }}</td>
+          <td>{{ subfield.label.text }}</td>
+        </label>
+      </tr>
+      {% endfor %}
+    </span>
+  </p>
+  <p>
+    {{ form.period.label }}
+    <span class="btn-group colors" data-toggle="buttons">
+      {% for subfield in form.period %}
+      {% if loop.index <= 1 %}
+      <label class="btn btn-default active">
+        {% else %}
+        <label class="btn btn-default">
+          {% endif %}
+          <td>{{ subfield }}</td>
+          <td>{{ subfield.label.text }}</td>
+        </label>
+      </tr>
+      {% endfor %}
+    </span>
+    <input type="submit", class="btn btn-primary", value="Remove silence">
+  </p>
+</form>
 
-        <div class="cut_progress">
-          <div class="cut_bar"></div >
-          <div class="cut_percent">0%</div >
-        </div>
+<div id="state"></div>
+
+<script type="text/javascript">
+function update_state()
+{
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+  $.getJSON($SCRIPT_ROOT+"/_state",
+  function(data) {
+    $("#state").text(data.state)
+    if (data.state == "finished"){
+      clearInterval(updateStatelId)
+      window.location.href='send_result'
+    }
+  });
+}
+var updateStatelId = setInterval(update_state, 1000)
+</script>

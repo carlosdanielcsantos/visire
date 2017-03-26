@@ -1,31 +1,43 @@
 <!DOCTYPE html>
 <html>
+    <head>
+      <title>Video Silence Remover</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link href="static/css/bootstrap.min.css" rel="stylesheet" media="screen">
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
+      <script src="http://malsup.github.com/jquery.form.js"></script>
+      <script src="static/js/bootstrap.min.js"></script>
+      <script src="{{ url_for('static', filename = 'upload_bar.js') }}"></script>
+    </head>
     <body>
-        <form method="POST" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            <p>
-            {{ form.videofile }}
-            </p>
-            <p>
-                <input type="submit" value="Upload video">
-            </p>
-        </form>
+        <div class="container">
+          <div class="center-block">
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <p>
+                  <div class="input-group">
+                    <span class="input-group-btn">
+                      <span class="btn btn-primary" onclick="$(this).parent().find('input[type=file]').click();">Browse</span>
+                      {{ form.videofile(style="display: none;", onchange="$(this).parent().parent().find('.form-control').html($(this).val().split(/[\\|/]/).pop());")}}
+                    </span>
+                    <span class="form-control"></span>
+                  </div>
+                </p>
+                <p>
+                    <input id=uploadButon type="submit", class="btn btn-primary disabled uploadfile",
+                           value="Upload video" disabled>
+                </p>
+            </form>
 
-        <h3>{{ uploaded }}</h3>
-
-        <div class="progress">
-          <div class="bar"></div >
-          <div class="percent">0%</div >
+            <div class="progress">
+              <div class="progress-bar" role="progressbar"></div >
+            </div>
+          </div>
         </div>
+        </div>
+
+        <div class="container">
         <div id="status"></div>
-
-        <div id="state"></div>
-        <script>
-          var state = {{ state }};
-        </script>
-
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7/jquery.js"></script>
-        <script src="http://malsup.github.com/jquery.form.js"></script>
-        <script src="{{ url_for('static', filename = 'upload_bar.js') }}"></script>
+        </div>
     </body>
 </html>
