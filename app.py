@@ -6,7 +6,6 @@ from flask_wtf import Form
 from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import RadioField
 from wtforms.validators import DataRequired
-from flask_bootstrap import Bootstrap
 import os, time
 
 SECRET_KEY = 'unv93qr32rfvby'
@@ -27,7 +26,6 @@ class SettingsForm(Form):
                         default='0')
 
 app = Flask('cutter')
-Bootstrap(app)
 
 app.config["UPLOAD_FOLDER"] = "uploads"
 app.config.from_object(__name__)
@@ -93,4 +91,4 @@ def send_result():
                  as_attachment=True)
 
 
-app.run(debug=False)
+app.run(debug=False, host='0.0.0.0')
