@@ -35,7 +35,6 @@ app.config.from_object(__name__)
 filename = ''
 filepath = ''
 cutter = None
-state = 'Waiting'
 
 @app.route("/", methods=("GET", "POST",))
 def index():
@@ -63,7 +62,6 @@ def index():
         magnitude = int(settingsForm.magnitude.data)
         period = int(settingsForm.period.data)
 
-        state = 'Starting...'
         cutter = video_cutter(filepath, magnitude, period)
 
         cutter.start()
@@ -78,8 +76,6 @@ def index():
 def _state():
     global cutter
     if cutter is not None:
-        #if cutter.finished and not cutter.sent:
-        #    return redirect(url_for('send_result'))
         return jsonify(state=cutter.state)
     else:
         return jsonify(state="Waiting")

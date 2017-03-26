@@ -27,6 +27,7 @@ $(document).ready(
                 if ($(this).val()) {
                     $('#uploadButon').removeClass('disabled');
                     $('input:submit').attr('disabled',false);
+                    $('.progress-bar').attr('aria-valuenow', '0%').css('width', '0%');
                     // or, as has been pointed out elsewhere:
                     // $('input:submit').removeAttr('disabled');
                 }

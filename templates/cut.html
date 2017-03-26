@@ -33,11 +33,10 @@
       </tr>
       {% endfor %}
     </span>
-    <input type="submit", class="btn btn-primary", value="Remove silence">
+    <button type="submit", class="btn btn-primary btn-lg", value="Remove silence",
+    id="removeSilence" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Starting">Remove silence</button>
   </p>
 </form>
-
-<div id="state"></div>
 
 <script type="text/javascript">
 function update_state()
@@ -45,12 +44,27 @@ function update_state()
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   $.getJSON($SCRIPT_ROOT+"/_state",
   function(data) {
-    $("#state").text(data.state)
-    if (data.state == "finished"){
+    if (data.state != lastState) {
+      $('#removeSilence').button('reset');
+      $('#removeSilence').data('loading-text', "<i class='fa fa-circle-o-notch fa-spin'></i> "+data.state);
+      $('#removeSilence').button('loading');
+      lastState = data.state
+    }
+    if (data.state == "Finished"){
       clearInterval(updateStatelId)
+      $('#removeSilence').button('reset');
       window.location.href='send_result'
     }
   });
 }
-var updateStatelId = setInterval(update_state, 1000)
+
+var updateStatelId
+var lastState = 'Init'
+
+$('#removeSilence').on('click', function() {
+    var $this = $(this);
+  $this.button('loading');
+  updateStatelId = setInterval(update_state, 500)
+});
+
 </script>
