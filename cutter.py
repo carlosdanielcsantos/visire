@@ -10,6 +10,7 @@ from moviepy.editor import *
 import numpy as np
 from threading import Thread
 from threading import Lock
+from os import path
 
 class video_cutter (Thread):
     def __init__(self, filename, magnitude, period):
@@ -74,15 +75,14 @@ class video_cutter (Thread):
 
             final_clip = concatenate_videoclips(listOfClips)
 
-            #filename.rpartition('/')[-1] =
-            cut_filename = self.cut_filename+"_cut.mp4"
+            fn = path.split(self.cut_filename)
+            self.cut_filename = path.join(fn[0],'no_silence_'+fn[1])
 
             self.mutex.acquire(1)
             self.state = 'Preparing your video'
             self.mutex.release()
 
-            final_clip.write_videofile(cut_filename)
-            self.cut_filename = cut_filename
+            final_clip.write_videofile(self.cut_filename)
 
         self.mutex.acquire(1)
         self.state = 'Finished'
