@@ -1,5 +1,5 @@
 FROM ubuntu:latest
-MAINTAINER Carlos Santos "carlosdanielcsantos@gmail.com"
+MAINTAINER Carlos Santos "carlosdanielcsantos"
 RUN apt-get update -y
 RUN apt-get install -y python-pip python-dev build-essential ffmpeg
 COPY . /app

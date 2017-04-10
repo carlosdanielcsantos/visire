@@ -1,6 +1,6 @@
-This is the Video Silence Remover project.
+This is the Visire project.
 
-Video Silence Remover is a webapp written in Python-Flask that let you remove silence or low volume segments from videos.
+Visire is a webapp written in Python-Flask that let you remove silent or low volume segments from videos.
 
 You can run the app in two ways:
 

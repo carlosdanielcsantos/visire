@@ -9,7 +9,6 @@ Created on Mon Mar 20 21:34:07 2017
 from moviepy.editor import *
 import numpy as np
 from threading import Thread
-from threading import Lock
 from os import path
 
 class video_cutter (Thread):
@@ -20,13 +19,15 @@ class video_cutter (Thread):
         # extract audio
         self.audio = self.clip.audio.to_soundarray()
 
-        # join channels  and normalize
+        # join channels and normalize
         self.join_audio = abs(self.audio).sum(axis=1)/self.clip.audio.nchannels
-        self.max_vol = self.join_audio.max()
+        self.join_audio /= self.join_audio.max()
 
+        # pre-defined thresholds
         periodThresholds = [2, 5, 10]
         magnitudeThresholds = [0.1, 0.2, 0.3]
 
+        # choose thresholds
         self.minTime = periodThresholds[period]
         self.volThreshold = magnitudeThresholds[magnitude]
 
@@ -34,36 +35,38 @@ class video_cutter (Thread):
         self.finished = False
         self.state = 'Init'
 
-        self.mutex = Lock()
-
     def run(self):
         cuts = list()
         growing = False
-
-        self.mutex.acquire(1)
         self.state = 'Analyzing'
-        self.mutex.release()
 
+        # check each sample
         for i in range(self.audio.shape[0]):
-            if self.join_audio[i] < self.volThreshold*self.max_vol:
+            # volume is lower than threshold
+            if self.join_audio[i] < self.volThreshold:
+                # if inside a silent segment
                 if growing:
+                    # update end position of silent segment
                     end = i
                 else:
+                    # start new silent segment
                     growing = True
                     start = i
             else:
-                if growing and end-start > self.clip.audio.fps * self.minTime:
+                # if volume recovered and silent segment length meets threshold
+                if growing and end - start > self.clip.audio.fps * self.minTime:
+                    # add segment's start and end samples to list
                     cuts.append([start, end])
 
                 growing = False
 
-        inactiveTimes = 1.0*np.array(cuts)/self.clip.audio.fps
+        # start/end time markers of silent segments
+        inactiveTimes = 1.0 * np.array(cuts) / self.clip.audio.fps
 
         if inactiveTimes.size > 0:
-            self.mutex.acquire(1)
             self.state = 'Cutting'
-            self.mutex.release()
 
+            # start/end time markers of non-silent segments
             activeTimes = np.roll(np.concatenate((inactiveTimes,
                                     np.array([[self.clip.duration, 0]])),
                                 axis=0), 1)
@@ -78,16 +81,11 @@ class video_cutter (Thread):
             fn = path.split(self.cut_filename)
             self.cut_filename = path.join(fn[0],'no_silence_'+fn[1])
 
-            self.mutex.acquire(1)
             self.state = 'Preparing your video'
-            self.mutex.release()
 
             final_clip.write_videofile(self.cut_filename)
 
-        self.mutex.acquire(1)
         self.state = 'Finished'
-        self.mutex.release()
-
         self.finished = True
 
     def get_cut_filename():
